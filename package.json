@@ -1,0 +1,42 @@
+{
+  "name": "farcaster.discovery",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch & nodemon dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitpancake/farcaster.discovery.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gitpancake/farcaster.discovery/issues"
+  },
+  "homepage": "https://github.com/gitpancake/farcaster.discovery#readme",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "@types/node": "^24.0.11",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@neynar/nodejs-sdk": "^3.22.0",
+    "@zoralabs/coins-sdk": "^0.2.8",
+    "amqplib": "^0.10.8",
+    "axios": "^1.10.0",
+    "dotenv": "^17.1.0",
+    "viem": "^2.31.7",
+    "zora": "^6.0.0"
+  }
+}
