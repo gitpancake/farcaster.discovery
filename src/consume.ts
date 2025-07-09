@@ -42,7 +42,7 @@ class FlashConsumer extends RabbitMQBaseConsumer {
     const imageData = await image.arrayBuffer();
     const imageFile = new File([imageData], `flash_${message.flash.flash_id}.jpg`, { type: image.headers.get("content-type") ?? "image/jpg" });
 
-    const name = `#${replaceSpacesWithCommas(message.flash.flash_count)} | ${message.flash.city}`;
+    const name = `${message.flash.city} | #${replaceSpacesWithCommas(message.flash.flash_count)}`;
     const symbol = removeSpaces(message.flash.flash_count);
     const description = `Captured in the wild: a street mosaic by Invader, the French artist who’s been installing pixel art across cities worldwide. Flashed at ${message.flash.timestamp} in ${message.flash.city} by ${user.username}.`;
 
