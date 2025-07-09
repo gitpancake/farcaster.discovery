@@ -9,7 +9,7 @@ This service listens to a RabbitMQ queue for flash messages containing informati
 1. Resolves the Farcaster ID (FID) to get the user's verified Ethereum address using the Neynar API
 2. Downloads the flash image from the provided URL
 3. Uploads metadata to Zora including the image, name, symbol, and description
-4. Creates a new Zora coin on Base Sepolia testnet with the flash datagst
+4. Creates a new Zora coin on Base or Base Sepolia (testnet/mainnet auto-selected)
 
 ## Features
 
@@ -17,7 +17,8 @@ This service listens to a RabbitMQ queue for flash messages containing informati
 - **Farcaster Integration**: Uses Neynar API to resolve FIDs to Ethereum addresses
 - **Zora Coin Creation**: Automatically creates tokens on Zora protocol
 - **Image Processing**: Downloads and uploads flash images to IPFS via Zora
-- **Base Sepolia Support**: Deploys coins on Base Sepolia testnet
+- **Testnet/Mainnet Support**: Deploys coins on Base Sepolia (testnet) or Base (mainnet) depending on `NODE_ENV`
+- **Structured Logging**: Uses Winston for robust, structured logs
 
 ## Prerequisites
 
@@ -53,6 +54,9 @@ PRIVATE_KEY=your_ethereum_private_key_here
 # RabbitMQ Configuration
 RABBITMQ_URL=amqp://localhost:5672
 RABBITMQ_QUEUE=flash_queue_name
+
+# Environment
+NODE_ENV=development # or 'production' for mainnet
 ```
 
 ## Usage
@@ -65,7 +69,7 @@ Start the development server with hot reload:
 yarn dev
 ```
 
-### Production
+### Production (Mainnet)
 
 Build the project:
 
@@ -73,10 +77,10 @@ Build the project:
 yarn build
 ```
 
-Start the production server:
+Start the production server (ensure `NODE_ENV=production` for mainnet):
 
 ```bash
-yarn start
+NODE_ENV=production yarn start
 ```
 
 ## Project Structure
@@ -90,11 +94,14 @@ src/
 │   └── users.ts         # User-related API operations
 ├── rabbitmq/
 │   └── index.ts         # RabbitMQ base consumer class
-├── zora/
-│   └── metadataUpload.ts # Zora metadata upload functionality
-└── util/
-    ├── cities.ts        # City-related utilities
-    └── strings.ts       # String manipulation utilities
+├── util/
+│   ├── cities.ts        # City-related utilities
+│   ├── strings.ts       # String manipulation utilities
+│   ├── logger.ts        # Winston-based Logger utility
+│   └── network.ts       # Network config utility (testnet/mainnet)
+└── zora/
+    ├── metadataUpload.ts # Zora metadata upload functionality
+    └── CoinDeployer.ts   # Coin deployment logic
 ```
 
 ## Message Format
@@ -126,6 +133,7 @@ The service expects messages in the following JSON format:
 - `axios`: HTTP client
 - `dotenv`: Environment variable management
 - `viem`: Ethereum client library
+- `winston`: Logging utility
 - `zora`: Zora protocol utilities
 
 ### Development Dependencies
@@ -139,34 +147,50 @@ The service expects messages in the following JSON format:
 
 ### Environment Variables
 
-| Variable         | Description                                  | Required |
-| ---------------- | -------------------------------------------- | -------- |
-| `NEYNAR_API_KEY` | Neynar API key for Farcaster integration     | Yes      |
-| `ZORA_API_KEY`   | Zora API key for protocol access             | Yes      |
-| `PRIVATE_KEY`    | Ethereum private key for transaction signing | Yes      |
-| `RABBITMQ_URL`   | RabbitMQ connection URL                      | Yes      |
-| `RABBITMQ_QUEUE` | RabbitMQ queue name to consume from          | Yes      |
+| Variable         | Description                                        | Required |
+| ---------------- | -------------------------------------------------- | -------- |
+| `NEYNAR_API_KEY` | Neynar API key for Farcaster integration           | Yes      |
+| `ZORA_API_KEY`   | Zora API key for protocol access                   | Yes      |
+| `PRIVATE_KEY`    | Ethereum private key for transaction signing       | Yes      |
+| `RABBITMQ_URL`   | RabbitMQ connection URL                            | Yes      |
+| `RABBITMQ_QUEUE` | RabbitMQ queue name to consume from                | Yes      |
+| `NODE_ENV`       | Set to 'production' for mainnet, otherwise testnet | Yes      |
 
 ### Blockchain Configuration
 
 The service is configured to work with:
 
-- **Network**: Base Sepolia testnet
+- **Network**: Base Sepolia testnet (default) or Base mainnet (`NODE_ENV=production`)
 - **Currency**: ETH
 - **Gas Multiplier**: 120% (for reliable transaction processing)
 
-## API Integration
+## Logging
 
-### Neynar API
+This project uses [Winston](https://github.com/winstonjs/winston) for structured logging.
 
-- Resolves Farcaster IDs (FIDs) to verified Ethereum addresses
-- Used for determining coin payout recipients
+- In development, logs are pretty-printed with timestamps and log levels.
+- In production, logs are output as JSON for easy ingestion by log management tools.
+- Only essential information is logged for coin deployments: contract address, transaction hash, explorer URL, and status.
 
-### Zora Protocol
+### Example Log Output
 
-- Uploads metadata (name, symbol, description, image) to IPFS
-- Creates new coins on Base Sepolia testnet
-- Handles image processing and storage
+**Development:**
+
+```
+[2024-05-01T12:00:00.000Z] [INFO] Coin deployed
+{
+  "contractAddress": "0x...",
+  "txHash": "0x...",
+  "explorerUrl": "https://basescan.org/tx/0x...",
+  "status": 1
+}
+```
+
+**Production:**
+
+```
+{"timestamp":"2024-05-01T12:00:00.000Z","level":"info","message":"Coin deployed","data":{"contractAddress":"0x...","txHash":"0x...","explorerUrl":"https://basescan.org/tx/0x...","status":1}}
+```
 
 ## Error Handling
 

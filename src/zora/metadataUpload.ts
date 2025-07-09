@@ -1,5 +1,6 @@
 import { createMetadataBuilder, createZoraUploaderForCreator } from "@zoralabs/coins-sdk";
 import { Address } from "viem";
+// Polyfill for File in Node.js
 
 type MetadataProps = {
   name: string;
